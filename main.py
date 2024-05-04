@@ -23,14 +23,6 @@ archivo_salida = 'medications.csv'
 # Load medication names from 
 # CSV
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
-    # Leer el archivo CSV y convertirlo en un DataFrame de pandas
-    df = pd.read_csv(archivo_csv, sep=';')
-
-    # Aplicar la función limpiar_nombre a la columna 'name' y crear una nueva columna 'limpia'
-    df["limpia"] = df["name"].apply(limpiar_nombre)
-    print(df.head())    
-    # Guardar el DataFrame resultante en un nuevo archivo CSV
-    df.to_csv(archivo_salida, sep=';', index=False)
     # Leer el archivo CSV
     lector_csv = csv.reader(csvfile, delimiter=';')
     # Iterar sobre cada fila del archivo
