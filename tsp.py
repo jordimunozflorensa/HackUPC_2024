@@ -10,7 +10,8 @@ def leer_lista_productos(archivo):
         reader = csv.DictReader(csvfile)
         for row in reader:
             localizaciones.append(list(map(int, row['localizacion'].strip('[]').split(','))))
-        #print(localizaciones)
+    localizaciones = [[0, 0, 0]] + localizaciones
+    print(localizaciones)
     return localizaciones
 
 def calcular_distancias(localizaciones):
@@ -56,7 +57,7 @@ def tsp_fast_travelling_salesman(distancias):
             last_node = i
     
     # Reconstruir el camino
-    path = [last_node]
+    path = [0, last_node]
     msk = (1 << n) - 1
     while prev[msk][last_node] != -1:
         prev_node = prev[msk][last_node]
@@ -64,7 +65,6 @@ def tsp_fast_travelling_salesman(distancias):
         msk ^= 1 << last_node
         last_node = prev_node
     
-    path.pop()
     return sol, path
 
 # Leer la lista de productos y calcular las distancias
@@ -73,6 +73,7 @@ distancias = calcular_distancias(localizaciones)
 
 # Resolver el problema del travelling salesman
 menor_costo, mejor_camino = tsp_fast_travelling_salesman(distancias)
-
+mejor_camino.pop()
+mejor_camino.pop(0)
 print("Mejor camino:", mejor_camino)
 print("Menor costo:", menor_costo)
