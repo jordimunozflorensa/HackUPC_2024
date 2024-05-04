@@ -146,8 +146,6 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
                 .response
         )
 
-listaa = []
-
 class KarakuloHandler(AbstractRequestHandler):
     """Handler for createOrder Intent."""
     def can_handle(self, handler_input):
@@ -170,7 +168,7 @@ class KarakuloHandler(AbstractRequestHandler):
                 .ask(speak_output)
                 .response
         )
-    
+
 class KaraQttHandler(AbstractRequestHandler):
     """Handler for cantidad Intent."""
     def can_handle(self, handler_input):
@@ -182,9 +180,79 @@ class KaraQttHandler(AbstractRequestHandler):
         contenido = handler_input.attributes_manager.session_attributes['contenido']
         slots = handler_input.request_envelope.request.intent.slots
         cantidad = slots.get('cantidad').value
+        
+        df = pd.read_csv("products.csv", delimiter=';')
+        var = df[df["name"] == contenido]
+        var1 = var.values[0].tolist()
+        var1.append(cantidad)
+        
         #speak_output = f"Orden creada con éxito: con {cantidad} unidades"
         speak_output = f"Orden creada: {cantidad} unidades de {contenido}"
         # Implementar la lógica para guardar la orden en S3
+        return (
+            handler_input.response_builder
+               .speak(speak_output)
+               .response
+        )
+
+from services import order_list_manager as olm
+from services import order_item_manager as oim
+
+class KrakrikraHandler(AbstractRequestHandler):
+    """Handler for Crear Lista Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        #return handler_input.attributes_manager.session_attributes.get('contenido') is not None
+        return ask_utils.is_intent_name("Krakrikra")(handler_input)
+        
+    def handle(self, handler_input):
+        list_manager = olm.OrderListManager()
+        list_manager.create_order_list()
+        speak_output = "Lista creada con exito!"
+        return (
+            handler_input.response_builder
+               .speak(speak_output)
+               .ask(speak_output)
+               .response
+        )
+
+class KaraBlaBlaHandler(AbstractRequestHandler):
+    """Handler for TEST Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        #return handler_input.attributes_manager.session_attributes.get('contenido') is not None
+        return ask_utils.is_intent_name("KaraBlaBla")(handler_input)
+        
+    def handle(self, handler_input):
+        
+
+        #list_manager = olm.OrderListManager()
+        #item_manager = oim.OrderItemManager()
+        #list_manager.create_order_list()
+        #item_manager.add_item("1", "paracetamel", "12930880321", 10)
+
+        speak_output = "hola"
+        """
+        s3 = boto3.client('s3')
+
+        # Implementar la lógica para guardar la orden en S3
+        data = [(f"{cantidad}", f"{contenido}")]
+
+        file_name = "/tmp/data.csv"
+        bucket_name = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
+        object_key = "data.csv"
+        
+        try:
+            with open(file_name, 'w', newline='') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                csv_writer.writerows(data)
+            s3.upload_file(file_name, bucket_name, object_key)
+            
+            logger.info("Data saved to S3://%s/%s", bucket_name, object_key)
+        except ClientError as e:
+            logger.error("Error uploading data to S3: %s", str(e))
+            raise e
+        """
         return (
             handler_input.response_builder
                .speak(speak_output)
@@ -198,7 +266,7 @@ import pandas as pd
 import re
 import os
 
-archivo_csv = 'products.csv'
+archivo_csv = 'data/products.csv'
 medications = []
 
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
@@ -234,6 +302,8 @@ sb = SkillBuilder()
 sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(KarakuloHandler())
 sb.add_request_handler(KaraQttHandler())
+sb.add_request_handler(KrakrikraHandler())
+sb.add_request_handler(KaraBlaBlaHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
