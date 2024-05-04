@@ -80,16 +80,20 @@ def cojer_nombres(filename, mejor_camino):
     
     return best_path_names
 
-# Leer la lista de productos y calcular las distancias
-localizaciones = leer_lista_productos('lista_productos.csv')
-distancias = calcular_distancias(localizaciones)
+def obtener_nombres_camino(nombre_csv):    
+    # Leer la lista de productos y calcular las distancias
+    localizaciones = leer_lista_productos(nombre_csv)
+    distancias = calcular_distancias(localizaciones)
 
-# Resolver el problema del travelling salesman
-menor_costo, mejor_camino = tsp_fast_travelling_salesman(distancias)
-mejor_camino.pop()
-mejor_camino.pop(0)
+    # Resolver el problema del travelling salesman
+    menor_costo, mejor_camino = tsp_fast_travelling_salesman(distancias)
+    mejor_camino.pop()
+    mejor_camino.pop(0)
 
-mejor_camino = cojer_nombres("lista_productos.csv", mejor_camino)
+    mejor_camino = cojer_nombres(nombre_csv, mejor_camino)
 
-print("Mejor camino:", mejor_camino)
-print("Menor costo:", menor_costo)
+    # print("Mejor camino:", mejor_camino)
+    # print("Menor costo:", menor_costo)
+
+    return mejor_camino
+
