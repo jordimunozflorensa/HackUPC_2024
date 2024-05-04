@@ -50,6 +50,18 @@ def simulated_annealing(localizaciones, T_max=1000, T_min=1, max_iter=10000, alp
     # Devuelve el mejor orden y costo encontrado
     return [0] + best_order + [0], best_cost
 
+def cojer_nombres(filename, mejor_camino):
+    # Leer el archivo CSV
+    df = pd.read_csv(filename)
+    
+    # Crear un diccionario para mapear los índices de fila a los nombres correspondientes
+    index_to_name = {index: row['name'] for index, row in df.iterrows()}
+    
+    # Crear una lista de nombres de acuerdo a los índices del mejor camino
+    best_path_names = [index_to_name[index-1] for index in mejor_camino]
+    
+    return best_path_names
+
 # Función principal del programa
 def main(filename):
     df = read_csv(filename)  # Lee el archivo CSV proporcionado
@@ -58,6 +70,9 @@ def main(filename):
     localizaciones.insert(0, start_location)  # Inserta el punto de inicio en la lista de localizaciones
     mejor_camino, menor_costo = simulated_annealing(localizaciones)  # Aplica el algoritmo de recocido simulado
     mejor_camino = [x for x in mejor_camino if x != 0]  # Elimina los puntos de inicio y fin del mejor camino
+
+    mejor_camino = cojer_nombres("lista_productos.csv", mejor_camino)
+
     print("Mejor orden de visitas:", mejor_camino)  # Imprime el mejor orden de visitas encontrado
     print("Costo total:", menor_costo)  # Imprime el costo total del mejor camino encontrado
 

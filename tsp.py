@@ -1,6 +1,7 @@
 import csv
 import itertools
 import numpy as np
+import pandas as pd
 from scipy.spatial.distance import pdist, squareform
 
 def leer_lista_productos(archivo):
@@ -11,7 +12,7 @@ def leer_lista_productos(archivo):
         for row in reader:
             localizaciones.append(list(map(int, row['localizacion'].strip('[]').split(','))))
     localizaciones = [[0, 0, 0]] + localizaciones
-    print(localizaciones)
+    #print(localizaciones)
     return localizaciones
 
 def calcular_distancias(localizaciones):
@@ -67,6 +68,18 @@ def tsp_fast_travelling_salesman(distancias):
     
     return sol, path
 
+def cojer_nombres(filename, mejor_camino):
+    # Leer el archivo CSV
+    df = pd.read_csv(filename)
+    
+    # Crear un diccionario para mapear los índices de fila a los nombres correspondientes
+    index_to_name = {index: row['name'] for index, row in df.iterrows()}
+    
+    # Crear una lista de nombres de acuerdo a los índices del mejor camino
+    best_path_names = [index_to_name[index-1] for index in mejor_camino]
+    
+    return best_path_names
+
 # Leer la lista de productos y calcular las distancias
 localizaciones = leer_lista_productos('lista_productos.csv')
 distancias = calcular_distancias(localizaciones)
@@ -75,5 +88,8 @@ distancias = calcular_distancias(localizaciones)
 menor_costo, mejor_camino = tsp_fast_travelling_salesman(distancias)
 mejor_camino.pop()
 mejor_camino.pop(0)
+
+mejor_camino = cojer_nombres("lista_productos.csv", mejor_camino)
+
 print("Mejor camino:", mejor_camino)
 print("Menor costo:", menor_costo)
