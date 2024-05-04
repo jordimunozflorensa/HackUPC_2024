@@ -15,6 +15,9 @@ from ask_sdk_core.handler_input import HandlerInput
 
 from ask_sdk_model import Response
 
+from services import order_list_manager as olm
+from services import order_item_manager as oim
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -147,7 +150,7 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
         )
 
 class KarakuloHandler(AbstractRequestHandler):
-    """Handler for createOrder Intent."""
+    """Handler for agregar item {nombre} Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return ask_utils.is_intent_name("Karakulo")(handler_input)
@@ -170,7 +173,7 @@ class KarakuloHandler(AbstractRequestHandler):
         )
 
 class KaraQttHandler(AbstractRequestHandler):
-    """Handler for cantidad Intent."""
+    """Handler for cantidad {numero} Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         #return handler_input.attributes_manager.session_attributes.get('contenido') is not None
@@ -181,12 +184,14 @@ class KaraQttHandler(AbstractRequestHandler):
         slots = handler_input.request_envelope.request.intent.slots
         cantidad = slots.get('cantidad').value
         
-        df = pd.read_csv("products.csv", delimiter=';')
-        var = df[df["name"] == contenido]
-        var1 = var.values[0].tolist()
-        var1.append(cantidad)
+        #df = pd.read_csv("products.csv", delimiter=';')
+        #var = df[df["name"] == contenido]
+        #var1 = var.values[0].tolist()
+        #var1.append(cantidad)
+        #new_row = {"id": var1[0], "name": var1[1], "ean": var1[2], "quantity": var1[3]}
         
-        #speak_output = f"Orden creada con éxito: con {cantidad} unidades"
+        #item_manager.add_item(new_row)
+        # speak_output = f"Orden creada con éxito: con {cantidad} unidades"
         speak_output = f"Orden creada: {cantidad} unidades de {contenido}"
         # Implementar la lógica para guardar la orden en S3
         return (
@@ -195,8 +200,6 @@ class KaraQttHandler(AbstractRequestHandler):
                .response
         )
 
-from services import order_list_manager as olm
-from services import order_item_manager as oim
 
 class KrakrikraHandler(AbstractRequestHandler):
     """Handler for Crear Lista Intent."""
@@ -225,37 +228,56 @@ class KaraBlaBlaHandler(AbstractRequestHandler):
         
     def handle(self, handler_input):
         
-
-        #list_manager = olm.OrderListManager()
-        #item_manager = oim.OrderItemManager()
-        #list_manager.create_order_list()
-        #item_manager.add_item("1", "paracetamel", "12930880321", 10)
-
-        speak_output = "hola"
-        """
-        s3 = boto3.client('s3')
-
-        # Implementar la lógica para guardar la orden en S3
-        data = [(f"{cantidad}", f"{contenido}")]
-
-        file_name = "/tmp/data.csv"
-        bucket_name = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
-        object_key = "data.csv"
+        list_manager = olm.OrderListManager()
+        item_manager = oim.OrderItemManager()
+        list_manager.create_order_list()
         
-        try:
-            with open(file_name, 'w', newline='') as csvfile:
-                csv_writer = csv.writer(csvfile)
-                csv_writer.writerows(data)
-            s3.upload_file(file_name, bucket_name, object_key)
-            
-            logger.info("Data saved to S3://%s/%s", bucket_name, object_key)
-        except ClientError as e:
-            logger.error("Error uploading data to S3: %s", str(e))
-            raise e
-        """
+        item_manager.add_item("hola","CALIERCORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CRCORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CALIERTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CALIERCfdsafsdjofadsoORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("adios","ADTAB GATO 12mg 0,5-2kg 1cp", "adios", "15")
+        #df = pd.read_csv("/data/products.csv", delimiter=';')
+        # contenido = "CALIERCORTIN 4mg/ml- 50ml iny"
+        # var = df[df["name"] == contenido]
+        # var1 = var.values[0].tolist()
+        # var1.append("5")
+        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        
+        # contenido = "ADTAB GATO 12mg 0,5-2kg 1cp"
+        # var = df[df["name"] == contenido]
+        # var1 = var.values[0].tolist()
+        # var1.append("5")
+        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        
+        speak_output = "hola"
         return (
             handler_input.response_builder
                .speak(speak_output)
+               .ask(speak_output)
+               .response
+        )
+
+class KaraPlinHandler(AbstractRequestHandler):
+    """Handler for Eliminar Item Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("KaraPlin")(handler_input)
+        
+    def handle(self, handler_input):
+        slots = handler_input.request_envelope.request.intent.slots
+        contenido_slot = slots.get('contenido')
+        if contenido_slot and contenido_slot.value:
+            best_match = find_medication(contenido_slot.value)
+            item_manager = oim.OrderItemManager()
+            item_manager.delete_item(best_match)
+            speak_output = f"Item {best_match} eliminado"
+        else:
+            speak_output = "No se encontró el valor de 'contenido'"
+        return (
+            handler_input.response_builder
+               .speak(speak_output)
+               .ask(speak_output)
                .response
         )
 
@@ -304,6 +326,10 @@ sb.add_request_handler(KarakuloHandler())
 sb.add_request_handler(KaraQttHandler())
 sb.add_request_handler(KrakrikraHandler())
 sb.add_request_handler(KaraBlaBlaHandler())
+
+sb.add_request_handler(KaraPlinHandler())
+
+
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
