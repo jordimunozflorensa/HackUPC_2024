@@ -24,10 +24,14 @@ class OrderItemManager:
         except Exception as e:
             logging.error(f"Error while checking if item exists: {e}")
     
-    def delete_item(self, prod_name: str, ean: str) -> None:
+    def delete_item(self, prod_name: str) -> None:
         try:
             df = self.read_default_list()
-            row_index = df[df["ean"] == ean].index[0]
+
+            if not self.exists_item(df, prod_name):
+                raise Exception(f"Item {prod_name} does not exist in the list.")
+
+            row_index = df[df["name"] == prod_name].index[0]
             df.drop(index=row_index, inplace=True)
             self.write_default_list(df)
             logging.info(f"Item {prod_name} deleted successfully.")
