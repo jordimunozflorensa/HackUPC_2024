@@ -4,7 +4,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
-DATA_PATH = os.path.join(os.getcwd(), "..", "data")
+DATA_PATH = os.path.join(os.getcwd(), "data")
 
 PRODUCTS_PATH = os.path.join(DATA_PATH, "products.csv")
 DEFAULT_ORDER_LIST_PATH = os.path.join(DATA_PATH, "default_order_list.csv")
