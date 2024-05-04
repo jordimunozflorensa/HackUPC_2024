@@ -11,6 +11,7 @@ from ask_sdk_core.skill_builder import SkillBuilder
 from ask_sdk_core.dispatch_components import AbstractRequestHandler
 from ask_sdk_core.dispatch_components import AbstractExceptionHandler
 from ask_sdk_core.handler_input import HandlerInput
+#from lambda_session import get_session_data
 
 from ask_sdk_model import Response
 
@@ -27,30 +28,12 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Welcome, you can say Hello or crearOrden or Help. Which would you like to try?"
+        speak_output = "Hola, puedes decir crearOrden o Help. ¿Cual quieres probar?"
 
         return (
             handler_input.response_builder
                 .speak(speak_output)
                 .ask(speak_output)
-                .response
-        )
-
-
-class HelloWorldIntentHandler(AbstractRequestHandler):
-    """Handler for Hello World Intent."""
-    def can_handle(self, handler_input):
-        # type: (HandlerInput) -> bool
-        return ask_utils.is_intent_name("HelloWorldIntent")(handler_input)
-
-    def handle(self, handler_input):
-        # type: (HandlerInput) -> Response
-        speak_output = "Hello World!"
-
-        return (
-            handler_input.response_builder
-                .speak(speak_output)
-                # .ask("add a reprompt if you want to keep the session open for the user to respond")
                 .response
         )
 
@@ -163,8 +146,10 @@ class CatchAllExceptionHandler(AbstractExceptionHandler):
                 .response
         )
 
+listaa = []
+
 class KarakuloHandler(AbstractRequestHandler):
-    """Handler for Karakulo Intent."""
+    """Handler for createOrder Intent."""
     def can_handle(self, handler_input):
         # type: (HandlerInput) -> bool
         return ask_utils.is_intent_name("Karakulo")(handler_input)
@@ -172,18 +157,72 @@ class KarakuloHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         slots = handler_input.request_envelope.request.intent.slots
-        chupa_slot = slots.get('chupa')
-        if chupa_slot and chupa_slot.value:
-            speak_output = f"Chupaaaaaaaaaaaaaaaaaaaa: {chupa_slot.value}"
+        contenido_slot = slots.get('contenido')
+        if contenido_slot and contenido_slot.value:
+            best_match = find_medication(contenido_slot.value)
+            handler_input.attributes_manager.session_attributes['contenido'] = best_match
+            speak_output = f"Orden creada: {handler_input.attributes_manager.session_attributes['contenido']}"
         else:
-            speak_output = "No se encontró el valor de 'chupa'"
-
+            speak_output = "No se encontró el valor de 'contenido'"
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(speak_output)
+                .response
+        )
+    
+class KaraQttHandler(AbstractRequestHandler):
+    """Handler for cantidad Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        #return handler_input.attributes_manager.session_attributes.get('contenido') is not None
+        return ask_utils.is_intent_name("KaraQtt")(handler_input)
+        
+    def handle(self, handler_input):
+        contenido = handler_input.attributes_manager.session_attributes['contenido']
+        slots = handler_input.request_envelope.request.intent.slots
+        cantidad = slots.get('cantidad').value
+        #speak_output = f"Orden creada con éxito: con {cantidad} unidades"
+        speak_output = f"Orden creada: {cantidad} unidades de {contenido}"
+        # Implementar la lógica para guardar la orden en S3
         return (
             handler_input.response_builder
                .speak(speak_output)
-                #.ask("add a reprompt if you want to keep the session open for the user to respond")
                .response
         )
+
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+import csv
+import pandas as pd
+import re
+import os
+
+archivo_csv = 'products.csv'
+medications = []
+
+with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
+    # Leer el archivo CSV
+    lector_csv = csv.reader(csvfile, delimiter=';')
+    # Iterar sobre cada fila del archivo
+    for fila in lector_csv:
+        # Agregar el elemento de la segunda columna a la lista
+        medications.append(fila[1])
+    # Eliminar el encabezado
+    medications = medications[1:]
+    #print("Medications:", medications)
+    
+def find_medication(input_text):
+    max_similarity = 0
+    best_match = None
+    print("Input text:", input_text)
+    for medication in medications:
+        similarity = fuzz.ratio(input_text, medication.lower())
+        if similarity > max_similarity:
+            print("Similarity:", similarity, "Medication:", medication)
+            max_similarity = similarity
+            best_match = medication
+    return best_match
 
 # The SkillBuilder object acts as the entry point for your skill, routing all request and response
 # payloads to the handlers above. Make sure any new handlers or interceptors you've
@@ -193,8 +232,8 @@ class KarakuloHandler(AbstractRequestHandler):
 sb = SkillBuilder()
 
 sb.add_request_handler(LaunchRequestHandler())
-sb.add_request_handler(HelloWorldIntentHandler())
 sb.add_request_handler(KarakuloHandler())
+sb.add_request_handler(KaraQttHandler())
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
