@@ -18,6 +18,15 @@ from ask_sdk_model import Response
 from services import order_list_manager as olm
 from services import order_item_manager as oim
 
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+import csv
+import pandas as pd
+import re
+import os
+
+archivo_csv = 'data/products.csv'
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -180,23 +189,27 @@ class KaraQttHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("KaraQtt")(handler_input)
         
     def handle(self, handler_input):
-        contenido = handler_input.attributes_manager.session_attributes['contenido']
-        slots = handler_input.request_envelope.request.intent.slots
-        cantidad = slots.get('cantidad').value
-        
-        #df = pd.read_csv("products.csv", delimiter=';')
-        #var = df[df["name"] == contenido]
-        #var1 = var.values[0].tolist()
-        #var1.append(cantidad)
-        #new_row = {"id": var1[0], "name": var1[1], "ean": var1[2], "quantity": var1[3]}
-        
-        #item_manager.add_item(new_row)
-        # speak_output = f"Orden creada con éxito: con {cantidad} unidades"
-        speak_output = f"Orden creada: {cantidad} unidades de {contenido}"
+        try:
+            contenido = handler_input.attributes_manager.session_attributes['contenido']
+            slots = handler_input.request_envelope.request.intent.slots
+            cantidad = slots.get('cantidad').value
+            
+            df = pd.read_csv("data/products.csv", delimiter=';')
+            var = df[df["name"] == contenido]
+            var1 = var.values[0].tolist()
+            var1.append(cantidad)
+            item_manager = oim.OrderItemManager()
+            item_manager.add_item(str(var1[0]), str(var1[1]), str(var1[2]), str(var1[3]))
+            
+            # speak_output = f"Orden creada con éxito: con {cantidad} unidades"
+            speak_output = f"Orden creada: {cantidad} unidades de {contenido}"
+        except Exception as e:
+            speak_output = f"{e}"
         # Implementar la lógica para guardar la orden en S3
         return (
             handler_input.response_builder
                .speak(speak_output)
+               .ask(speak_output)
                .response
         )
 
@@ -237,19 +250,20 @@ class KaraBlaBlaHandler(AbstractRequestHandler):
         item_manager.add_item("hola","CALIERTIN 4mg/ml- 50ml iny", "adios", "10")
         item_manager.add_item("hola","CALIERCfdsafsdjofadsoORTIN 4mg/ml- 50ml iny", "adios", "10")
         item_manager.add_item("adios","ADTAB GATO 12mg 0,5-2kg 1cp", "adios", "15")
-        #df = pd.read_csv("/data/products.csv", delimiter=';')
-        # contenido = "CALIERCORTIN 4mg/ml- 50ml iny"
-        # var = df[df["name"] == contenido]
-        # var1 = var.values[0].tolist()
-        # var1.append("5")
-        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        #df = pd.read_csv("data/products.csv", delimiter=';')
+        #contenido = "CALIERCORTIN 4mg/ml- 50ml iny"
+        #var = df[df["name"] == contenido]
+        #var1 = var.values[0].tolist()
+        #var1.append("5")
+        #item_manager.add_item(str(var1[0]), str(var1[1]), str(var1[2]), str(var1[3]))
         
-        # contenido = "ADTAB GATO 12mg 0,5-2kg 1cp"
-        # var = df[df["name"] == contenido]
-        # var1 = var.values[0].tolist()
-        # var1.append("5")
-        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        #contenido = "ADTAB GATO 12mg 0,5-2kg 1cp"
+        #var = df[df["name"] == contenido]
+        #var1 = var.values[0].tolist()
+        #var1.append("8")
+        #item_manager.add_item(str(var1[0]), str(var1[1]), str(var1[2]), str(var1[3]))
         
+        #speak_output = f"{var1}"
         speak_output = "hola"
         return (
             handler_input.response_builder
@@ -265,15 +279,19 @@ class KaraPlinHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("KaraPlin")(handler_input)
         
     def handle(self, handler_input):
-        slots = handler_input.request_envelope.request.intent.slots
-        contenido_slot = slots.get('contenido')
-        if contenido_slot and contenido_slot.value:
-            best_match = find_medication(contenido_slot.value)
-            item_manager = oim.OrderItemManager()
-            item_manager.delete_item(best_match)
-            speak_output = f"Item {best_match} eliminado"
-        else:
-            speak_output = "No se encontró el valor de 'contenido'"
+        try:
+            slots = handler_input.request_envelope.request.intent.slots
+            contenido_slot = slots.get('contenido')
+            #speak_output = f"{contenido_slot}"
+            if contenido_slot and contenido_slot.value:
+                best_match = find_medication(contenido_slot.value)
+                item_manager = oim.OrderItemManager()
+                item_manager.delete_item(best_match)
+                speak_output = f"Item {best_match} eliminado"
+            else:
+                speak_output = "No se encontró el valor de 'contenido'"
+        except Exception as e:
+            speak_output = f"{e}"
         return (
             handler_input.response_builder
                .speak(speak_output)
@@ -281,14 +299,6 @@ class KaraPlinHandler(AbstractRequestHandler):
                .response
         )
 
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
-import csv
-import pandas as pd
-import re
-import os
-
-archivo_csv = 'data/products.csv'
 medications = []
 
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
