@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import logging
 import boto3
+import csv
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,10 +19,11 @@ class OrderItemManager:
 
     def read_default_list(self) -> pd.DataFrame:
         self.s3.download_file(BUCKET_NAME, OBJECT_KEY, LOCAL_DEFAULT_ORDER_LIST_PATH)
-        return pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH)
+        dtype_spec = {'id': str, 'name': str, 'ean': str, "quantity": str}
+        return pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, dtype=dtype_spec)
 
     def write_default_list(self, df: pd.DataFrame) -> None:
-        df.to_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, index=False)
+        df.to_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, index=False, quoting=csv.QUOTE_ALL)
         self.s3.upload_file(LOCAL_DEFAULT_ORDER_LIST_PATH, BUCKET_NAME, OBJECT_KEY)
 
     def exists_item(self, df: pd.DataFrame, name: str) -> bool:
@@ -44,7 +46,7 @@ class OrderItemManager:
         except Exception as e:
             logging.error(f"Error while deleting item: {e}")
 
-    def modify_item(self, prod_name: str, new_qty: int) -> None:
+    def modify_item(self, prod_name: str, new_qty: str) -> None:
         try:
             df = self.read_default_list()
 
@@ -59,7 +61,7 @@ class OrderItemManager:
             logging.error(f"Error while modifying item: {e}")
 
 
-    def add_item(self, id: str, name: str, ean: str, qty: int) -> None:
+    def add_item(self, id: str, name: str, ean: str, qty: str) -> None:
         try:
             df = self.read_default_list()
             new_data = pd.DataFrame({"id": [id], "name": [name], "ean": [ean], "quantity": [qty]})

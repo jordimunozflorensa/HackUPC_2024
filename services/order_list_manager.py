@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import logging
 import boto3
+import csv
 
 logging.basicConfig(level=logging.INFO)
 
@@ -19,10 +20,11 @@ class OrderListManager:
 
     def read_default_list(self) -> pd.DataFrame:
         self.s3.download_file(BUCKET_NAME, OBJECT_KEY, LOCAL_DEFAULT_ORDER_LIST_PATH)
-        return pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH)
+        dtype_spec = {'id': str, 'name': str, 'ean': str, "quantity": str}
+        return pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, dtype=dtype_spec)
 
     def write_default_list(self, df: pd.DataFrame) -> None:
-        df.to_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, index=False)
+        df.to_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, index=False, quoting=csv.QUOTE_ALL)
         self.s3.upload_file(LOCAL_DEFAULT_ORDER_LIST_PATH, BUCKET_NAME, OBJECT_KEY)
 
     def exists_order_list(self, order_list_name: str):

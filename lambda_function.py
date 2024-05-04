@@ -228,14 +228,56 @@ class KaraBlaBlaHandler(AbstractRequestHandler):
         
     def handle(self, handler_input):
         
-        #list_manager = olm.OrderListManager()
-        #item_manager = oim.OrderItemManager()
-        #list_manager.create_order_list()
-        #item_manager.add_item("1", "paracetamel", "12930880321", 10)
+        list_manager = olm.OrderListManager()
+        item_manager = oim.OrderItemManager()
+        list_manager.create_order_list()
+        
+        item_manager.add_item("hola","CALIERCORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CRCORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CALIERTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("hola","CALIERCfdsafsdjofadsoORTIN 4mg/ml- 50ml iny", "adios", "10")
+        item_manager.add_item("adios","ADTAB GATO 12mg 0,5-2kg 1cp", "adios", "15")
+        #df = pd.read_csv("/data/products.csv", delimiter=';')
+        # contenido = "CALIERCORTIN 4mg/ml- 50ml iny"
+        # var = df[df["name"] == contenido]
+        # var1 = var.values[0].tolist()
+        # var1.append("5")
+        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        
+        # contenido = "ADTAB GATO 12mg 0,5-2kg 1cp"
+        # var = df[df["name"] == contenido]
+        # var1 = var.values[0].tolist()
+        # var1.append("5")
+        # item_manager.add_item(str(var1[0]), str(va1[1]), str(var1[2]), str(var1[3]))
+        
         speak_output = "hola"
         return (
             handler_input.response_builder
                .speak(speak_output)
+               .ask(speak_output)
+               .response
+        )
+
+class KaraPlinHandler(AbstractRequestHandler):
+    """Handler for Eliminar Item Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("KaraPlin")(handler_input)
+        
+    def handle(self, handler_input):
+        slots = handler_input.request_envelope.request.intent.slots
+        contenido_slot = slots.get('contenido')
+        if contenido_slot and contenido_slot.value:
+            best_match = find_medication(contenido_slot.value)
+            item_manager = oim.OrderItemManager()
+            item_manager.delete_item(best_match)
+            speak_output = f"Item {best_match} eliminado"
+        else:
+            speak_output = "No se encontró el valor de 'contenido'"
+        return (
+            handler_input.response_builder
+               .speak(speak_output)
+               .ask(speak_output)
                .response
         )
 
@@ -284,6 +326,10 @@ sb.add_request_handler(KarakuloHandler())
 sb.add_request_handler(KaraQttHandler())
 sb.add_request_handler(KrakrikraHandler())
 sb.add_request_handler(KaraBlaBlaHandler())
+
+sb.add_request_handler(KaraPlinHandler())
+
+
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(FallbackIntentHandler())
