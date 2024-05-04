@@ -63,19 +63,17 @@ def cojer_nombres(filename, mejor_camino):
     return best_path_names
 
 # Función principal del programa
-def main(filename):
-    df = read_csv(filename)  # Lee el archivo CSV proporcionado
+def obtener_nombres_camino(nombre_csv):
+    df = read_csv(nombre_csv)  # Lee el archivo CSV proporcionado
     localizaciones = [eval(loc) for loc in df['localizacion']]  # Extrae las coordenadas de localización del DataFrame
     start_location = [0, 0, 0]  # Define el punto de inicio
     localizaciones.insert(0, start_location)  # Inserta el punto de inicio en la lista de localizaciones
     mejor_camino, menor_costo = simulated_annealing(localizaciones)  # Aplica el algoritmo de recocido simulado
     mejor_camino = [x for x in mejor_camino if x != 0]  # Elimina los puntos de inicio y fin del mejor camino
 
-    mejor_camino = cojer_nombres("lista_productos.csv", mejor_camino)
+    mejor_camino = cojer_nombres(nombre_csv, mejor_camino)
 
-    print("Mejor orden de visitas:", mejor_camino)  # Imprime el mejor orden de visitas encontrado
-    print("Costo total:", menor_costo)  # Imprime el costo total del mejor camino encontrado
+    return mejor_camino
+    # print("Mejor orden de visitas:", mejor_camino)  # Imprime el mejor orden de visitas encontrado
+    # print("Costo total:", menor_costo)  # Imprime el costo total del mejor camino encontrado
 
-# Verifica si el script se está ejecutando directamente
-if __name__ == "__main__":
-    main("lista_productos.csv")  # Llama a la función principal con el nombre del archivo CSV proporcionado
