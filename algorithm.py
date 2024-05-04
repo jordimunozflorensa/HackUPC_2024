@@ -8,5 +8,3 @@ def decidir_alg(nombre_csv):
         return tonc(nombre_csv)
     else:
         return sonc(nombre_csv)
-    
-print(decidir_alg('lista_productos.csv'))   
