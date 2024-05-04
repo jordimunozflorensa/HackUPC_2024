@@ -1,10 +1,8 @@
+ALSA lib pcm_dmix.c:1032:(snd_pcm_dmix_open) unable to open slave
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.rear
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.center_lfe
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.side
 ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
 Cannot connect to server socket err = No such file or directory
 Cannot connect to server request channel
 jack server is not running or cannot be started
@@ -21,18 +19,17 @@ ALSA lib confmisc.c:160:(snd_config_get_card) Invalid field card
 ALSA lib pcm_usb_stream.c:482:(_snd_pcm_usb_stream_open) Invalid card 'card'
 ALSA lib confmisc.c:160:(snd_config_get_card) Invalid field card
 ALSA lib pcm_usb_stream.c:482:(_snd_pcm_usb_stream_open) Invalid card 'card'
+ALSA lib pcm_dmix.c:1032:(snd_pcm_dmix_open) unable to open slave
 Cannot connect to server socket err = No such file or directory
 Cannot connect to server request channel
 jack server is not running or cannot be started
 JackShmReadWritePtr::~JackShmReadWritePtr - Init not done for -1, skipping unlock
 JackShmReadWritePtr::~JackShmReadWritePtr - Init not done for -1, skipping unlock
+ALSA lib pcm_dmix.c:1032:(snd_pcm_dmix_open) unable to open slave
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.rear
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.center_lfe
 ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM cards.pcm.side
 ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
-ALSA lib pcm_route.c:877:(find_matching_chmap) Found no matching channel map
 Cannot connect to server socket err = No such file or directory
 Cannot connect to server request channel
 jack server is not running or cannot be started
@@ -49,17 +46,18 @@ ALSA lib confmisc.c:160:(snd_config_get_card) Invalid field card
 ALSA lib pcm_usb_stream.c:482:(_snd_pcm_usb_stream_open) Invalid card 'card'
 ALSA lib confmisc.c:160:(snd_config_get_card) Invalid field card
 ALSA lib pcm_usb_stream.c:482:(_snd_pcm_usb_stream_open) Invalid card 'card'
+ALSA lib pcm_dmix.c:1032:(snd_pcm_dmix_open) unable to open slave
 Cannot connect to server socket err = No such file or directory
 Cannot connect to server request channel
 jack server is not running or cannot be started
 JackShmReadWritePtr::~JackShmReadWritePtr - Init not done for -1, skipping unlock
 JackShmReadWritePtr::~JackShmReadWritePtr - Init not done for -1, skipping unlock
 Traceback (most recent call last):
-  File "/home/jordi/Escritorio/Jordi/HackUPC_2024/main.py", line 98, in <module>
+  File "/home/jordi/Escritorio/Jordi/HackUPC_2024/main.py", line 101, in <module>
     user_input = recognize_speech_1()
-  File "/home/jordi/Escritorio/Jordi/HackUPC_2024/main.py", line 46, in recognize_speech_1
-    audio = recognizer.listen(source)
-  File "/home/jordi/.local/lib/python3.10/site-packages/speech_recognition/__init__.py", line 523, in listen
+  File "/home/jordi/Escritorio/Jordi/HackUPC_2024/main.py", line 48, in recognize_speech_1
+    recognizer.adjust_for_ambient_noise(source)  # Adjust for ambient noise
+  File "/home/jordi/.local/lib/python3.10/site-packages/speech_recognition/__init__.py", line 393, in adjust_for_ambient_noise
     buffer = source.stream.read(source.CHUNK)
   File "/home/jordi/.local/lib/python3.10/site-packages/speech_recognition/__init__.py", line 199, in read
     return self.pyaudio_stream.read(size, exception_on_overflow=False)
