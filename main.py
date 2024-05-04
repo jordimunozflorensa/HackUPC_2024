@@ -20,8 +20,7 @@ def limpiar_nombre(nombre):
 
 archivo_salida = 'medications.csv'
 
-# Load medication names from 
-# CSV
+# Load medication names from CSV
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
     # Leer el archivo CSV
     lector_csv = csv.reader(csvfile, delimiter=';')

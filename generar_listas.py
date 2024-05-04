@@ -10,7 +10,7 @@ with open('products.csv', newline='', encoding='utf-8') as csvfile:
 
 # Crear la lista de productos con cantidades y localizaciones aleatorias
 productos_lista = []
-for _ in range(random.randint(20,20)):
+for _ in range(random.randint(5,16)):
     producto = random.choice(productos)
     cantidad = random.randint(1, 7)
     localizacion = [random.randint(1, 20), random.randint(1, 20), random.randint(1, 20)]
