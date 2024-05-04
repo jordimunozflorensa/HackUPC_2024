@@ -1,22 +1,40 @@
 import csv
+import pandas as pd
+import re
+import os
 import speech_recognition as sr
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
-import os
 from google.cloud import speech_v1p1beta1 as speech
 
-archivo_csv = 'products.csv'
+archivo_csv = 'medications.csv'
 medications = []
+
+def limpiar_nombre(nombre):
+    # Usar expresión regular para encontrar la parte del nombre sin números
+    limpio = re.match(r'^([^\d]+)', nombre).group(0)
+    return limpio   
+
+# archivo_salida = 'medications.csv'
 
 # Load medication names from 
 # CSV
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
+    # # Leer el archivo CSV y convertirlo en un DataFrame de pandas
+    # df = pd.read_csv(archivo_csv, sep=';')
+
+    # # Aplicar la función limpiar_nombre a la columna 'name' y crear una nueva columna 'limpia'
+    # df["limpia"] = df["name"].apply(limpiar_nombre)
+
+    # # Guardar el DataFrame resultante en un nuevo archivo CSV
+    # df.to_csv(archivo_salida, sep=';', index=False)
     # Leer el archivo CSV
     lector_csv = csv.reader(csvfile, delimiter=';')
     # Iterar sobre cada fila del archivo
     for fila in lector_csv:
         # Agregar el elemento de la segunda columna a la lista
-        medications.append(fila[1])
+        medications.append(fila[3])
+    # Eliminar el encabezado
     medications = medications[1:]
     #print("Medications:", medications)
 
@@ -28,7 +46,7 @@ def recognize_speech_1():
         audio = recognizer.listen(source)
     try:
         print("Recognizing...")
-        text = recognizer.recognize_google(audio, language='es-ES')
+        text = recognizer.recognize_google(audio, language='en-US')
         return text.lower()
     except sr.UnknownValueError:
         print("Sorry, I couldn't understand what you said.")
