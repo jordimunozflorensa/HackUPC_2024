@@ -12,6 +12,7 @@ LOCAL_DEFAULT_ORDER_LIST_PATH = "/tmp/data.csv"
 BUCKET_NAME = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
 OBJECT_KEY = "data.csv"
 
+
 class OrderListManager:
     """Class to create, delete and rename csv files, which are order lists."""
 
@@ -20,7 +21,7 @@ class OrderListManager:
 
     def read_default_list(self) -> pd.DataFrame:
         self.s3.download_file(BUCKET_NAME, OBJECT_KEY, LOCAL_DEFAULT_ORDER_LIST_PATH)
-        dtype_spec = {'id': str, 'name': str, 'ean': str, "quantity": str}
+        dtype_spec = {"id": str, "name": str, "ean": str, "quantity": str}
         return pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, dtype=dtype_spec)
 
     def write_default_list(self, df: pd.DataFrame) -> None:
@@ -36,16 +37,23 @@ class OrderListManager:
         self.write_default_list(df)
         logging.info(f"Default order list cleaned successfully!")
 
-    def load_order_list(self, order_list_name: str):
+    def load_order_list(self, order_list_name: str) -> None:
         """
         Load a csv file to the default order list.
         Delete the csv file being loaded.
         """
         try:
-            df = pd.read_csv(f"{LOCAL_ORDER_LISTS_PATH}/{order_list_name}.csv")
-            os.remove(f"{LOCAL_ORDER_LISTS_PATH}/{order_list_name}.csv")
-            df.to_csv(LOCAL_DEFAULT_ORDER_LIST_PATH, index=False)
-        except FileNotFoundError:
+            # check if it exists first
+            # objects = self.s3.list_objects(BUCKET_NAME)
+            DESIRED_OBJECT_KEY = f"{order_list_name}.csv"
+            # if DESIRED_OBJECT_KEY not in objects:
+            #     raise Exception(f"Order list '{order_list_name}' does not exist.")
+            self.s3.download_file(
+                BUCKET_NAME, DESIRED_OBJECT_KEY, LOCAL_DEFAULT_ORDER_LIST_PATH
+            )
+            self.s3.upload_file(LOCAL_DEFAULT_ORDER_LIST_PATH, BUCKET_NAME, OBJECT_KEY)
+            self.s3.delete_object(BUCKET_NAME, f"{order_list_name}.csv")
+        except Exception as e:
             logging.info(f"Order list '{order_list_name}' does not exist.")
 
     def save_order_list(self, order_list_name: str):
@@ -53,8 +61,10 @@ class OrderListManager:
         Save the current order list to a new csv file.
         Clean the default order list after saving it.
         """
-        df = pd.read_csv(LOCAL_DEFAULT_ORDER_LIST_PATH)
-        df.to_csv(f"{LOCAL_ORDER_LISTS_PATH}/{order_list_name}.csv", index=False)
+        self.s3.download_file(BUCKET_NAME, OBJECT_KEY, LOCAL_DEFAULT_ORDER_LIST_PATH)
+        self.s3.upload_file(
+            LOCAL_DEFAULT_ORDER_LIST_PATH, BUCKET_NAME, f"{order_list_name}.csv"
+        )
         self.create_order_list()
         logging.info(f"Order list '{order_list_name}' saved successfully.")
 

@@ -184,6 +184,58 @@ class KarakuloHandler(AbstractRequestHandler):
                 .response
         )
 
+class KrisafelHandler(AbstractRequestHandler):
+    """Handler for importar lista {nombre} Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("Krisafel")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        try:
+            slots = handler_input.request_envelope.request.intent.slots
+            nombre_slot = slots.get('nombre')
+            if nombre_slot and nombre_slot.value:
+                list_manager = olm.OrderListManager()
+                splitted_contenido = nombre_slot.value.split(" ")
+                join_file_path = "_".join(splitted_contenido)
+                list_manager.load_order_list(join_file_path)
+                speak_output = f"Lista {join_file_path} cargada!"
+        except Exception as e:
+            speak_output = f"{e}"
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(speak_output)
+                .response
+        )
+
+class KruchucHandler(AbstractRequestHandler):
+    """Handler for guardar lista {nombre} Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("Kruchuc")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        try:
+            slots = handler_input.request_envelope.request.intent.slots
+            nombre_slot = slots.get('nombre')
+            if nombre_slot and nombre_slot.value:
+                list_manager = olm.OrderListManager()
+                splitted_contenido = nombre_slot.value.split(" ")
+                join_file_path = "_".join(splitted_contenido)
+                list_manager.save_order_list(join_file_path)
+                speak_output = f"Lista {join_file_path} guardada!"
+        except Exception as e:
+            speak_output = f"{e}"
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(speak_output)
+                .response
+        )
+
 class KaraQttHandler(AbstractRequestHandler):
     """Handler for cantidad {numero} Intent."""
     def can_handle(self, handler_input):
@@ -381,6 +433,8 @@ sb.add_request_handler(KaraBlaBlaHandler())
 sb.add_request_handler(KaraPlinHandler())
 sb.add_request_handler(JaramikoHandler())
 
+sb.add_request_handler(KrisafelHandler())
+sb.add_request_handler(KruchucHandler())
 
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
