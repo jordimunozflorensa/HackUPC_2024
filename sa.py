@@ -77,3 +77,4 @@ def obtener_nombres_camino(nombre_csv):
     # print("Mejor orden de visitas:", mejor_camino)  # Imprime el mejor orden de visitas encontrado
     # print("Costo total:", menor_costo)  # Imprime el costo total del mejor camino encontrado
 
+# print(obtener_nombres_camino('lista_productos.csv'))  # Llama a la función principal con el nombre del archivo CSV
