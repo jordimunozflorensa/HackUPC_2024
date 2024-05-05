@@ -25,6 +25,9 @@ import pandas as pd
 import re
 import os
 
+from services import sa
+from services import tsp
+
 archivo_csv = 'data/products.csv'
 
 logger = logging.getLogger(__name__)
@@ -299,6 +302,44 @@ class KaraPlinHandler(AbstractRequestHandler):
                .response
         )
 
+class JaramikoHandler(AbstractRequestHandler):
+    """Handler for "Dame la ruta de la lista {nombre}" Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("Jaramiko")(handler_input)
+        
+    def handle(self, handler_input):
+        #s3 = boto3.client("s3")
+        #download_fie_path = "/tmp/data.csv"
+        #bucket_name = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
+        #object_key = "data.csv"
+        speak_output = ""
+        
+        try:
+            #slots = handler_input.request_envelope.request.intent.slots
+            #contenido_slot = slots.get('nombre')
+            #speak_output = "chupa2"
+            #s3.download_file(bucket_name, object_key, download_fie_path)
+            nombres = []
+            nombre_csv = "data/prueba.csv"
+            df = pd.read_csv(nombre_csv)
+            if len(df) < 16:
+                nombres = tsp.obtener_nombres_camino(nombre_csv)
+            else:
+                nombres = sa.obtener_nombres_camino(nombre_csv)
+                
+            for nom in nombres:
+                speak_output += nom
+            
+        except Exception as e:
+            speak_output = f"{e}"
+        return (
+            handler_input.response_builder
+               .speak(speak_output)
+               .ask(speak_output)
+               .response
+        )
+
 medications = []
 
 with open(archivo_csv, newline='', encoding='utf-8') as csvfile:
@@ -338,6 +379,7 @@ sb.add_request_handler(KrakrikraHandler())
 sb.add_request_handler(KaraBlaBlaHandler())
 
 sb.add_request_handler(KaraPlinHandler())
+sb.add_request_handler(JaramikoHandler())
 
 
 sb.add_request_handler(HelpIntentHandler())
