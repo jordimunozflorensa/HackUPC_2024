@@ -28,6 +28,8 @@ import os
 from services import sa
 from services import tsp
 
+import boto3
+
 archivo_csv = 'data/products.csv'
 
 logger = logging.getLogger(__name__)
@@ -361,24 +363,20 @@ class JaramikoHandler(AbstractRequestHandler):
         return ask_utils.is_intent_name("Jaramiko")(handler_input)
         
     def handle(self, handler_input):
-        #s3 = boto3.client("s3")
-        #download_fie_path = "/tmp/data.csv"
-        #bucket_name = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
-        #object_key = "data.csv"
+        s3 = boto3.client("s3")
+        download_file_path = "/tmp/data.csv"
+        bucket_name = "f35e4180-5bc7-4810-9403-95ab49618c83-eu-west-1"
+        object_key = "data.csv"
         speak_output = ""
-        
+
         try:
-            #slots = handler_input.request_envelope.request.intent.slots
-            #contenido_slot = slots.get('nombre')
-            #speak_output = "chupa2"
-            #s3.download_file(bucket_name, object_key, download_fie_path)
+            s3.download_file(bucket_name, object_key, download_file_path)
             nombres = []
-            nombre_csv = "data/prueba.csv"
-            df = pd.read_csv(nombre_csv)
+            df = pd.read_csv(download_file_path)
             if len(df) < 16:
-                nombres = tsp.obtener_nombres_camino(nombre_csv)
+                nombres = tsp.obtener_nombres_camino(download_file_path)
             else:
-                nombres = sa.obtener_nombres_camino(nombre_csv)
+                nombres = sa.obtener_nombres_camino(download_file_path)
                 
             for nom in nombres:
                 speak_output += nom

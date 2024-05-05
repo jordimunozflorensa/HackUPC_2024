@@ -16,6 +16,7 @@ KaraPlin -> Eliminar producto
 Krakrikra -> Crear lista
 Krisafel -> Importar lista
 Kruchuc -> Guardar lista
+Jaramiko -> decir ruta
 
 class KaraPlinHandler(AbstractRequestHandler):
     """Handler for Eliminar Item Intent."""
