@@ -45,7 +45,7 @@ class LaunchRequestHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Hola, puedes decir crearOrden o Help. ¿Cual quieres probar?"
+        speak_output = "Buenas tardes, empieza la jornada laboral. ¿En qué puedo ayudarte?"
 
         return (
             handler_input.response_builder
@@ -179,6 +179,35 @@ class KarakuloHandler(AbstractRequestHandler):
             speak_output = f"Orden creada: {handler_input.attributes_manager.session_attributes['contenido']}"
         else:
             speak_output = "No se encontró el valor de 'contenido'"
+        return (
+            handler_input.response_builder
+                .speak(speak_output)
+                .ask(speak_output)
+                .response
+        )
+
+class MakakinoHandler(AbstractRequestHandler):
+    """Handler for lugar {prod_nombre} Intent."""
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("Makakino")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        try:
+            slots = handler_input.request_envelope.request.intent.slots
+            nombre_slot = slots.get('nombre')
+            if nombre_slot and nombre_slot.value:
+                best_match = find_medication(nombre_slot.value)
+
+                df = pd.read_csv("data/products1.csv", delimiter=';')
+                var = df[df["name"] == best_match]["localizacion"]
+                localizacion = var.values
+                speak_output = f"La localización de {best_match} es {localizacion}"
+            else:
+                speak_output = "No se encontró el producto"
+        except Exception as e:
+            speak_output = f"{e}"
         return (
             handler_input.response_builder
                 .speak(speak_output)
@@ -433,6 +462,8 @@ sb.add_request_handler(JaramikoHandler())
 
 sb.add_request_handler(KrisafelHandler())
 sb.add_request_handler(KruchucHandler())
+
+sb.add_request_handler(MakakinoHandler())
 
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
