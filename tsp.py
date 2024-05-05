@@ -2,23 +2,26 @@ import csv
 import itertools
 import numpy as np
 import pandas as pd
-from scipy.spatial.distance import pdist, squareform
 
 def leer_lista_productos(archivo):
-    #Lee el archivo CSV de la lista de productos y devuelve una lista de localizaciones.
     localizaciones = []
     with open(archivo, newline='', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             localizaciones.append(list(map(int, row['localizacion'].strip('[]').split(','))))
     localizaciones = [[0, 0, 0]] + localizaciones
-    #print(localizaciones)
     return localizaciones
 
+def calcular_distancia(p1, p2):
+    # Calcula la distancia entre dos puntos utilizando la distancia de Manhattan (cityblock)
+    return sum(abs(a - b) for a, b in zip(p1, p2))
+
 def calcular_distancias(localizaciones):
-    #Calcula las distancias entre todas las localizaciones.
-    distancias = squareform(pdist(localizaciones, metric='cityblock'))
-    #print(distancias)
+    n = len(localizaciones)
+    distancias = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            distancias[i][j] = calcular_distancia(localizaciones[i], localizaciones[j])
     return distancias
 
 # def tsp_travelling_salesman(distancias):
@@ -96,4 +99,5 @@ def obtener_nombres_camino(nombre_csv):
     # print("Menor costo:", menor_costo)
 
     return mejor_camino
+
 
